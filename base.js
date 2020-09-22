@@ -1,29 +1,92 @@
 var log = console.log.bind(console)
 
-var canvas = document.querySelector('#id-canvas')
-var context = canvas.getContext('2d')
-
-var x = 100
-var y = 200
-
-var img = new Image()
-img.src = 'paddle.png'
-log(img)
-img.onload = function(){
-    context.drawImage(img, x, y)
+var imageFromPath = function(path) {
+    var img = new Image()
+    img.src = path
+    return img
 }
 
-// events
-window.addEventListener('keydown', function(event){
-    var k = event.key
-    // log(event)
-    if (k == 'a') {
-        x -= 5
-        context.clearRect(0, 0, canvas.clientWidth, canvas.height)
-        context.drawImage(img, x, y)
-    } else if (k == 'd') {
-        x += 5
-        context.clearRect(0, 0, canvas.clientWidth, canvas.height)
-        context.drawImage(img, x, y)
+var Paddle = function() {
+    var image = imageFromPath('paddle.png')
+    var o = {
+        image: image,
+        x: 100,
+        y: 200,
+        speed: 5,
     }
-})
+    o.moveLeft = function() {
+        o.x -= o.speed
+    }
+    o.moveRight = function() {
+        o.x += o.speed
+    }
+    return o
+}
+
+var PeachGame = function() {
+    var g = {}
+    var canvas = document.querySelector('#id-canvas')
+    var context = canvas.getContext('2d')
+    g.canvas = canvas
+    g.context = context
+
+    setInterval(function() {
+        //update
+        g.update()
+        // clear
+        context.clearRect(0, 0, canvas.clientWidth, canvas.height)
+        // draw
+        g.draw()
+    }, 1000/30)
+
+    return g
+}
+
+
+var __main = function() {
+    var game = PeachGame()
+    var paddle = Paddle()
+
+    var Rightdown = false
+    var Leftdown = false
+
+    // events
+    window.addEventListener('keydown', function(event){
+        var k = event.key
+        log('keydown')
+        if (k == 'a') {
+            Rightdown = true
+        } else if (k == 'd') {
+            Leftdown = true
+        }
+    })
+
+    // events
+    window.addEventListener('keyup', function(event){
+        var k = event.key
+        log('keyup')
+        if (k == 'a') {
+            Rightdown = false
+        } else if (k == 'd') {
+            Leftdown = false
+        }
+    })
+
+    game.update = function() {
+        // update x
+        // log('update', Leftdown, Rightdown)
+        if (Leftdown) {
+            paddle.moveLeft()
+        } else if (Rightdown) {
+            paddle.moveRight()
+        }
+    }
+
+    game.draw = function() {
+        // draw
+        game.context.drawImage(paddle.image, paddle.x, paddle.y)
+    }
+
+}
+
+__main()
