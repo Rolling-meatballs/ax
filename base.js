@@ -23,6 +23,38 @@ var Paddle = function() {
     return o
 }
 
+var Ball = function() {
+    var image = imageFromPath('ball.jpg')
+    var o = {
+        image: image,
+        x: 100,
+        y: 200,
+        speedX: 10,
+        speedY: 10,
+        fired: false,
+    }
+    o.fire = function() {
+        o.fired = true
+        // log('fire')
+    }
+    o.move = function() {
+        log('here is ball')
+        if (o.fired) {
+            // log('move')
+            if (o.x < 0 || o.x > 400) {
+                o.speedX = -o.speedX
+            }
+            if (o.y < 0 || o.y > 300) {
+                o.speedY = -o.speedY
+            }
+            // move
+            o.x += o.speedX
+            o.y += o.speedY
+        }
+    }
+    return o
+}
+
 var PeachGame = function() {
     var g = {
         actions: {},
@@ -74,6 +106,7 @@ var PeachGame = function() {
 var __main = function() {
     var game = PeachGame()
     var paddle = Paddle()
+    var ball = Ball()
 
     var Rightdown = false
     var Leftdown = false
@@ -86,14 +119,19 @@ var __main = function() {
         paddle.moveRight()
     })
 
+    game.registerAction('f', function() {
+        ball.fire()
+    })
+
     game.update = function() {
         // update x
-        // log('update', Leftdown, Rightdown)
+        ball.move()
     }
 
     game.draw = function() {
         // draw
         game.drawImage(paddle)
+        game.drawImage(ball)
     }
 
 }
