@@ -11,22 +11,14 @@ var Paddle = function() {
     var o = {
         image: image,
         x: 100,
-        y: 250,
-        speed: 15,
+        y: 200,
+        speed: 5,
     }
     o.moveLeft = function() {
         o.x -= o.speed
     }
     o.moveRight = function() {
         o.x += o.speed
-    }
-    o.collide = function(ball) {
-      if (ball.y + ball.image.height > o.y) {
-        if (ball.x > o.x && ball.x < o.x + o.image.width) {
-          return true
-        }
-      }
-      return false
     }
     return o
 }
@@ -43,8 +35,10 @@ var Ball = function() {
     }
     o.fire = function() {
         o.fired = true
+        // log('fire')
     }
     o.move = function() {
+        log('here is ball')
         if (o.fired) {
             // log('move')
             if (o.x < 0 || o.x > 400) {
@@ -61,87 +55,84 @@ var Ball = function() {
     return o
 }
 
-var AGame = function() {
-  var g = {
-    actions: {},
-    keydowns: {},
-    // update: function(){
-    // },
-  }
-  var canvas = document.querySelector('#id-canvas')
-  var context = canvas.getContext('2d')
-  g.canvas = canvas
-  g.context = context
-  // draw
-  g.drawImage = function(aImage) {
-    g.context.drawImage(aImage.image, aImage.x, aImage.y)
-  }
-
-  // events
-  window.addEventListener('keydown', function(event) {
-    g.keydowns[event.key] = true
-  })
-  window.addEventListener('keyup', function(event) {
-    g.keydowns[event.key] = false
-  })
-  //
-  g.registerAction = function(key, callback) {
-    log('registerAction', key)
-    g.actions[key] = callback
-  }
-  // timer
-
-  setInterval(function() {
-    // events
-    var actions = Object.keys(g.actions)
-    for (var i = 0; i < actions.length; i++) {
-       var key = actions[i]
-       if(g.keydowns[key]) {
-         // 如果按键按下，调用注册的action
-         g.actions[key]()
-       }
+var PeachGame = function() {
+    var g = {
+        actions: {},
+        keydowns: {},
     }
-    // update
-    g.update()
-    //clear
-    g.context.clearRect(0, 0, g.canvas.width, g.canvas.height)
+    var canvas = document.querySelector('#id-canvas')
+    var context = canvas.getContext('2d')
+    g.canvas = canvas
+    g.context = context
     //draw
-    g.draw()
-  }, 1000/30)
+    g.drawImage = function(peachImage) {
+        g.context.drawImage(peachImage.image, peachImage.x, peachImage.y)
+    }
 
-  return g;
+    window.addEventListener('keydown', function(event){
+        g.keydowns[event.key] = true
+    })
+
+    window.addEventListener('keyup', function(event){
+        g.keydowns[event.key] = false
+    })
+
+    g.registerAction = function(key, callback) {
+        g.actions[key] = callback
+    }
+
+    setInterval(function() {
+        // event
+        var actions = Object.keys(g.actions)
+        for (var i = 0; i < actions.length; i++) {
+            var key = actions[i]
+            if(g.keydowns[key]) {
+                // if key was passdown, run register action
+                g.actions[key]()
+            }
+        }
+        //update
+        g.update()
+        // clear
+        context.clearRect(0, 0, canvas.clientWidth, canvas.height)
+        // draw
+        g.draw()
+    }, 1000/30)
+
+    return g
 }
 
+
 var __main = function() {
-  var game = AGame()
+    var game = PeachGame()
+    var paddle = Paddle()
+    var ball = Ball()
 
-  var paddle = Paddle()
-  var ball = Ball()
+    var Rightdown = false
+    var Leftdown = false
 
-  game.registerAction('a', function() {
-    paddle.moveLeft()
-  })
-  game.registerAction('d', function() {
-    paddle.moveRight()
-  })
-  game.registerAction('f', function() {
-    ball.fire()
-  })
+    game.registerAction('a', function() {
+        paddle.moveLeft()
+    })
 
-  game.update = function() {
-    ball.move()
-    // 判断相撞
-    if (paddle.collide(ball)) {
-      // 这里调用一个函数
-      ball.speedY *= -1
+    game.registerAction('d', function() {
+        paddle.moveRight()
+    })
+
+    game.registerAction('f', function() {
+        ball.fire()
+    })
+
+    game.update = function() {
+        // update x
+        ball.move()
     }
-  }
 
-  game.draw = function() {
-    // draw
-    game.drawImage(paddle)
-    game.drawImage(ball)
-  }
+    game.draw = function() {
+        // draw
+        game.drawImage(paddle)
+        game.drawImage(ball)
+    }
 
 }
 
