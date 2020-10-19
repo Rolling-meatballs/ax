@@ -11,14 +11,22 @@ var Paddle = function() {
     var o = {
         image: image,
         x: 100,
-        y: 200,
-        speed: 5,
+        y: 250,
+        speed: 15,
     }
     o.moveLeft = function() {
         o.x -= o.speed
     }
     o.moveRight = function() {
         o.x += o.speed
+    }
+    o.collide = function(ball) {
+        if (ball.y + ball.image.height > o.y) {
+            if (ball.x > o.x && ball.x < o.x + o.image.width) {
+                return true
+            }
+        }
+        return false
     }
     return o
 }
@@ -126,6 +134,10 @@ var __main = function() {
     game.update = function() {
         // update x
         ball.move()
+        // for interface
+        if (paddle.collide(ball)) {
+            ball.speedY *= -1
+        }
     }
 
     game.draw = function() {
