@@ -37,8 +37,8 @@ var Ball = function() {
         image: image,
         x: 100,
         y: 200,
-        speedX: 10,
-        speedY: 10,
+        speedX: 6,
+        speedY: 6,
         fired: false,
     }
     o.fire = function() {
@@ -59,6 +59,18 @@ var Ball = function() {
             o.x += o.speedX
             o.y += o.speedY
         }
+    }
+    return o
+}
+
+var Block = function() {
+    var image = imageFromPath('block.jpg')
+    var o = {
+        image: image,
+        x: 50,
+        y: 50,
+        w: 60,
+        h: 20,
     }
     return o
 }
@@ -105,7 +117,7 @@ var PeachGame = function() {
         context.clearRect(0, 0, canvas.clientWidth, canvas.height)
         // draw
         g.draw()
-    }, 1000/30)
+    }, 1000/60)
 
     return g
 }
@@ -115,6 +127,7 @@ var __main = function() {
     var game = PeachGame()
     var paddle = Paddle()
     var ball = Ball()
+    var block = Block()
 
     var Rightdown = false
     var Leftdown = false
@@ -144,6 +157,8 @@ var __main = function() {
         // draw
         game.drawImage(paddle)
         game.drawImage(ball)
+        // draw block
+        game.drawImage(block)
     }
 
 }
