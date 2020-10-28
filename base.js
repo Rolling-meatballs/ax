@@ -60,18 +60,37 @@ var Ball = function() {
             o.y += o.speedY
         }
     }
+    o.back = function() {
+        o.speedY *= -1
+    }
     return o
+}
+
+var rectIntersects = function(o, b) {
+    if (b.y > o.y && b.y < o.y + o.image.height) {
+        if (b.x > o.x && b.x < o.x + o.image.width) {
+            return true
+        }
+    }
+    return false
 }
 
 var Block = function() {
     var image = imageFromPath('block.jpg')
     var o = {
         image: image,
-        x: 50,
-        y: 50,
+        x: 100,
+        y: 100,
         w: 60,
         h: 20,
+        alive: true,
     }
+    o.kill = function() {
+        o.alive = false
+    }
+    o.collide = function(b) {
+        return o.alive && (rectIntersects(o, b) || rectIntersects(b, o))
+        }
     return o
 }
 
@@ -127,7 +146,15 @@ var __main = function() {
     var game = PeachGame()
     var paddle = Paddle()
     var ball = Ball()
-    var block = Block()
+
+    var blocks = []
+    for (let i = 0; i < 3; i++) {
+        var b = Block()
+        // set block seat
+        b.x = i * 150
+        b.y = 60
+        blocks.push(b)
+    }
 
     var Rightdown = false
     var Leftdown = false
@@ -151,6 +178,16 @@ var __main = function() {
         if (paddle.collide(ball)) {
             ball.speedY *= -1
         }
+        // judge ball and blocks interface
+        for (let i = 0; i < blocks.length; i++) {
+            const block = blocks[i];
+            if (block.collide(ball)) {
+                log('block interface')
+                block.kill()
+                ball.back()
+            }
+        }
+        
     }
 
     game.draw = function() {
@@ -158,7 +195,13 @@ var __main = function() {
         game.drawImage(paddle)
         game.drawImage(ball)
         // draw block
-        game.drawImage(block)
+        for (let i = 0; i < blocks.length; i++) {
+            const block = blocks[i];
+            if (block.alive) {
+                game.drawImage(block)
+            }
+        }
+        
     }
 
 }
