@@ -1,163 +1,39 @@
-var log = console.log.bind(console)
-
-var imageFromPath = function(path) {
-    var img = new Image()
-    img.src = path
-    return img
+var loadLevel = function(n) {
+    n = n -1
+    var level = levels[n]
+    var blocks = []
+    for (let i = 0; i < level.length; i++) {
+        var p = level[i]
+        var b = Block(p)
+        blocks.push(b)
+    }
+    return blocks
 }
 
-var Paddle = function() {
-    var image = imageFromPath('paddle.png')
-    var o = {
-        image: image,
-        x: 100,
-        y: 250,
-        speed: 15,
+var enableDebugMode = function(enable) {
+    if(!enable) {
+        return 
     }
-    o.moveLeft = function() {
-        o.x -= o.speed
-    }
-    o.moveRight = function() {
-        o.x += o.speed
-    }
-    o.collide = function(ball) {
-        if (ball.y + ball.image.height > o.y) {
-            if (ball.x > o.x && ball.x < o.x + o.image.width) {
-                return true
-            }
+    window.addEventListener('keydown', function(event) {
+        var k = event.key
+        if (k == 'p') {
+            // stop function
+            paused = !paused
+        } else if ('1234567'.includes(k)) {
+            blocks = loadLevel(Number(k))
         }
-        return false
-    }
-    return o
-}
-
-var Ball = function() {
-    var image = imageFromPath('ball.jpg')
-    var o = {
-        image: image,
-        x: 100,
-        y: 200,
-        speedX: 6,
-        speedY: 6,
-        fired: false,
-    }
-    o.fire = function() {
-        o.fired = true
-        // log('fire')
-    }
-    o.move = function() {
-        log('here is ball')
-        if (o.fired) {
-            // log('move')
-            if (o.x < 0 || o.x > 400) {
-                o.speedX = -o.speedX
-            }
-            if (o.y < 0 || o.y > 300) {
-                o.speedY = -o.speedY
-            }
-            // move
-            o.x += o.speedX
-            o.y += o.speedY
-        }
-    }
-    o.back = function() {
-        o.speedY *= -1
-    }
-    return o
-}
-
-var rectIntersects = function(o, b) {
-    if (b.y > o.y && b.y < o.y + o.image.height) {
-        if (b.x > o.x && b.x < o.x + o.image.width) {
-            return true
-        }
-    }
-    return false
-}
-
-var Block = function() {
-    var image = imageFromPath('block.jpg')
-    var o = {
-        image: image,
-        x: 100,
-        y: 100,
-        w: 60,
-        h: 20,
-        alive: true,
-    }
-    o.kill = function() {
-        o.alive = false
-    }
-    o.collide = function(b) {
-        return o.alive && (rectIntersects(o, b) || rectIntersects(b, o))
-        }
-    return o
-}
-
-var PeachGame = function() {
-    var g = {
-        actions: {},
-        keydowns: {},
-    }
-    var canvas = document.querySelector('#id-canvas')
-    var context = canvas.getContext('2d')
-    g.canvas = canvas
-    g.context = context
-    //draw
-    g.drawImage = function(peachImage) {
-        g.context.drawImage(peachImage.image, peachImage.x, peachImage.y)
-    }
-
-    window.addEventListener('keydown', function(event){
-        g.keydowns[event.key] = true
     })
-
-    window.addEventListener('keyup', function(event){
-        g.keydowns[event.key] = false
-    })
-
-    g.registerAction = function(key, callback) {
-        g.actions[key] = callback
-    }
-
-    setInterval(function() {
-        // event
-        var actions = Object.keys(g.actions)
-        for (var i = 0; i < actions.length; i++) {
-            var key = actions[i]
-            if(g.keydowns[key]) {
-                // if key was passdown, run register action
-                g.actions[key]()
-            }
-        }
-        //update
-        g.update()
-        // clear
-        context.clearRect(0, 0, canvas.clientWidth, canvas.height)
-        // draw
-        g.draw()
-    }, 1000/60)
-
-    return g
 }
-
 
 var __main = function() {
-    var game = PeachGame()
+    enableDebugMode(true)
+    var game = PeachGame(30)
     var paddle = Paddle()
     var ball = Ball()
 
-    var blocks = []
-    for (let i = 0; i < 3; i++) {
-        var b = Block()
-        // set block seat
-        b.x = i * 150
-        b.y = 60
-        blocks.push(b)
-    }
+    var blocks = loadLevel(1)
 
-    var Rightdown = false
-    var Leftdown = false
+    var paused = false
 
     game.registerAction('a', function() {
         paddle.moveLeft()
@@ -172,6 +48,10 @@ var __main = function() {
     })
 
     game.update = function() {
+        // paused
+        if (paused) {
+            return 
+        }
         // update x
         ball.move()
         // for interface
